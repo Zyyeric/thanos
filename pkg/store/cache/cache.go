@@ -45,8 +45,8 @@ type IndexCache interface {
 	StorePostings(blockID ulid.ULID, l labels.Label, v []byte, tenant string)
 
 	// FetchMultiPostings fetches multiple postings - each identified by a label -
-	// and returns a map containing cache hits, along with a list of missing keys.
-	FetchMultiPostings(ctx context.Context, blockID ulid.ULID, keys []labels.Label, tenant string) (hits map[labels.Label][]byte, misses []labels.Label)
+	// and returns a slice containing cache hits, with the index maps to the input keys, along with a list of missing keys.
+	FetchMultiPostings(ctx context.Context, blockID ulid.ULID, keys []labels.Label, tenant string) (hits [][]byte, misses []labels.Label)
 
 	// StoreExpandedPostings stores expanded postings for a set of label matchers.
 	StoreExpandedPostings(blockID ulid.ULID, matchers []*labels.Matcher, v []byte, tenant string)

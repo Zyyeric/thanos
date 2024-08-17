@@ -92,7 +92,7 @@ func (c *RemoteIndexCache) StorePostings(blockID ulid.ULID, l labels.Label, v []
 // FetchMultiPostings fetches multiple postings - each identified by a label -
 // and returns a map containing cache hits, along with a list of missing keys.
 // In case of error, it logs and return an empty cache hits map.
-func (c *RemoteIndexCache) FetchMultiPostings(ctx context.Context, blockID ulid.ULID, lbls []labels.Label, tenant string) (hits map[labels.Label][]byte, misses []labels.Label) {
+func (c *RemoteIndexCache) FetchMultiPostings(ctx context.Context, blockID ulid.ULID, lbls []labels.Label, tenant string) (hits [][]byte, misses []labels.Label) {
 	timer := prometheus.NewTimer(c.fetchLatency.WithLabelValues(CacheTypePostings, tenant))
 	defer timer.ObserveDuration()
 
@@ -112,9 +112,9 @@ func (c *RemoteIndexCache) FetchMultiPostings(ctx context.Context, blockID ulid.
 		return nil, lbls
 	}
 
-	// Construct the resulting hits map and list of missing keys. We iterate on the input
+	// Construct the resulting hits slice and list of missing keys. We iterate on the input
 	// list of labels to be able to easily create the list of ones in a single iteration.
-	hits = make(map[labels.Label][]byte, len(results))
+	hits = [][]byte{}
 	for i, lbl := range lbls {
 		// Check if the key has been found in memcached. If not, we add it to the list
 		// of missing keys.
@@ -124,7 +124,7 @@ func (c *RemoteIndexCache) FetchMultiPostings(ctx context.Context, blockID ulid.
 			continue
 		}
 
-		hits[lbl] = value
+		hits[i] = value
 	}
 	c.hitsTotal.WithLabelValues(CacheTypePostings, tenant).Add(float64(len(hits)))
 	return hits, misses

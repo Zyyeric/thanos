@@ -39,7 +39,7 @@ func (c *FilteredIndexCache) StorePostings(blockID ulid.ULID, l labels.Label, v 
 
 // FetchMultiPostings fetches multiple postings - each identified by a label -
 // and returns a map containing cache hits, along with a list of missing keys.
-func (c *FilteredIndexCache) FetchMultiPostings(ctx context.Context, blockID ulid.ULID, keys []labels.Label, tenant string) (hits map[labels.Label][]byte, misses []labels.Label) {
+func (c *FilteredIndexCache) FetchMultiPostings(ctx context.Context, blockID ulid.ULID, keys []labels.Label, tenant string) (hits [][]byte, misses []labels.Label) {
 	if c.postingsEnabled {
 		return c.cache.FetchMultiPostings(ctx, blockID, keys, tenant)
 	}

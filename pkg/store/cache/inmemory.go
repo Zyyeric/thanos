@@ -297,12 +297,12 @@ func (c *InMemoryIndexCache) StorePostings(blockID ulid.ULID, l labels.Label, v 
 }
 
 // FetchMultiPostings fetches multiple postings - each identified by a label -
-// and returns a map containing cache hits, along with a list of missing keys.
-func (c *InMemoryIndexCache) FetchMultiPostings(ctx context.Context, blockID ulid.ULID, keys []labels.Label, tenant string) (hits map[labels.Label][]byte, misses []labels.Label) {
+// and returns a slice containing cache hits, with the index maps to the input keys, along with a list of missing keys.
+func (c *InMemoryIndexCache) FetchMultiPostings(ctx context.Context, blockID ulid.ULID, keys []labels.Label, tenant string) (hits [][]byte, misses []labels.Label) {
 	timer := prometheus.NewTimer(c.commonMetrics.FetchLatency.WithLabelValues(CacheTypePostings, tenant))
 	defer timer.ObserveDuration()
 
-	hits = map[labels.Label][]byte{}
+	hits = [][]byte{}
 
 	blockIDKey := blockID.String()
 	requests := 0
@@ -318,7 +318,7 @@ func (c *InMemoryIndexCache) FetchMultiPostings(ctx context.Context, blockID uli
 		requests++
 		if b, ok := c.get(CacheKey{blockIDKey, CacheKeyPostings(key), ""}); ok {
 			hit++
-			hits[key] = b
+			hits[i] = b
 			continue
 		}
 
